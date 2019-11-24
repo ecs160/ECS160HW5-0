@@ -20,9 +20,26 @@ typedef struct {
   int size;
 } TotalCounts;
 
+void sort_tweet_counts(TotalCounts * counts)
+{
+  int i;
+  for (i=0; i<counts->size; i++) {
+    int j;
+    for (j=0; j<counts->size-i-1; j++) {
+        int a = counts->count[i].n;
+        int b = counts->count[j].n;
+        if (a <= b) {
+            TweeterCount hold = counts->count[i];
+            counts->count[i] = counts->count[j];
+            counts->count[j] = hold; 
+        }
+    }
+  }
+}
 
-int find_tweeter(TotalCounts* tweetCounts, char* name){
 
+int find_tweeter(TotalCounts* tweetCounts, char* name)
+{
   if(tweetCounts == NULL || name == NULL){
     printf("find_tweeter @ Null Argument\n");
     return -1;
@@ -129,8 +146,8 @@ void parse_row(char * line, TotalCounts * tweet_counts)
     if (match_idx == -1) {
       // Not Found
       int last = tweet_counts->size;
-      TweeterCount * new_count = malloc(sizeof(TweeterCount));
-      if (new_count == NULL) {
+      TweeterCount * new_tweeter_count = malloc(sizeof(TweeterCount));
+      if (new_tweeter_count == NULL) {
         //todo error
         exit(1);
       }
@@ -144,14 +161,20 @@ void parse_row(char * line, TotalCounts * tweet_counts)
 
       memcpy(tweeter_name, col, name_len);
 
-      new_count->name = tweeter_name;
-      new_count->n = 1;
+      new_tweeter_count->name = tweeter_name;
+      new_tweeter_count->n = 1;
 
-      tweet_counts[last] = new_count;
+      tweet_counts->count[last] = *new_tweeter_count;
+
+      printf("tweeter %s has %i tweets\n", tweet_counts->count[last].name, tweet_counts->count[last].n);
+      tweet_counts->size = tweet_counts->size + 1;
     } else {
-      int count = (tweet_counts[match_idx])->n;
+      int count = tweet_counts->count[match_idx].n;
 
-    }
+      tweet_counts->count[match_idx].n = count + 1;
+
+      printf("tweeter %s has %i tweets\n", tweet_counts->count[match_idx].name, tweet_counts->count[match_idx].n);
+      }
 
     // Bring back the quotes
     if (removed_quotes) {
