@@ -20,6 +20,27 @@ typedef struct {
   int size;
 } TotalCounts;
 
+
+int find_tweeter(TotalCounts* tweetCounts, char* name){
+
+  if(tweetCounts == NULL || name == NULL){
+    printf("find_tweeter @ Null Argument\n");
+    return -1;
+  }
+
+  int i = 0; 
+  int idx = -1; 
+
+  for(i = 0; i < tweetCounts->size; i++){
+    if(strcmp(name, tweetCounts->count[i].name) == 0){
+        idx = i;
+        break; 
+    }
+  }
+
+  return idx;
+}
+
 Header * parse_header(char ** line)
 {
   Header * header = malloc(sizeof(Header));
@@ -105,7 +126,7 @@ void parse_row(char * line, TotalCounts * tweet_count)
 
     // int i = find_tweeter(tweet_count, col);
     // if (i == -1) {
-    //   // tweeter not yet found
+    //   printf("NOT FOUND"); 
     // }
 
     // Bring back the quotes
