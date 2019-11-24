@@ -134,6 +134,8 @@ void parse_row(char * line, TotalCounts * tweet_counts)
       continue;
     }
 
+    // printf("col: %s\n", col);
+
     int len = strlen(col);
 
     int removed_quotes = 0;
@@ -163,13 +165,13 @@ void parse_row(char * line, TotalCounts * tweet_counts)
       }
 
       int name_len = strlen(col);
-      char * tweeter_name = malloc(name_len);
+      char * tweeter_name = malloc(name_len + 1);
       if (tweeter_name == NULL) {
         // todo error
         exit(1);
       }
 
-      memcpy(tweeter_name, col, name_len);
+      memcpy(tweeter_name, col, name_len+1);
 
       new_tweeter_count->name = tweeter_name;
       new_tweeter_count->n = 1;
