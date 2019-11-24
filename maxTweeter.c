@@ -22,11 +22,11 @@ typedef struct {
 
 void print_tweet_counts(TotalCounts * counts)
 {
-  printf("\n---- PRINTING ALL ----\n");
+  // printf("\n---- PRINTING ALL ----\n");
   int i;
-  for (i=0; i<counts->size; i++) {
+  for (i=0; i<counts->size && i < 10; i++) {
     TweeterCount * this_count = counts->count[i];
-    printf("tweeter %s has %i tweets\n", this_count->name, this_count->n);
+    printf("%s: %i\n", this_count->name, this_count->n);
   }
 }
 
@@ -51,7 +51,7 @@ void sort_tweet_counts(TotalCounts * counts)
 int find_tweeter(TotalCounts* tweetCounts, char* name)
 {
   if(tweetCounts == NULL || name == NULL){
-    printf("find_tweeter @ Null Argument\n");
+    // printf("find_tweeter @ Null Argument\n");
     return -1;
   }
 
@@ -81,14 +81,14 @@ Header * parse_header(char ** line)
   int i = 0;
 
   while( (col = strsep(&line, ",")) != NULL ) {
-    printf("col entry: %s\n", col);
+    // printf("col entry: %s\n", col);
 
     int removed_quotes = 0;
 
     int len = strlen(col);
     if (*col == '"') {
       if (col[len-1] != '"') {
-        printf("Bad quote\n");
+        // // printf("Bad quote\n");
         exit(1);
       }
 
@@ -96,12 +96,12 @@ Header * parse_header(char ** line)
       col = col + 1;
 
       removed_quotes = 1;
-      printf("col name: %s\n", col);
+      // printf("col name: %s\n", col);
     }
     
     int cmp = strcmp(col, TWEETER_COL_NAME);
     if (cmp == 0) {
-      printf("found name @ %i\n", i);
+      // printf("found name @ %i\n", i);
       header->tweeter_idx = i;
       break;
     }
@@ -115,7 +115,7 @@ Header * parse_header(char ** line)
   }
 
   if (header->tweeter_idx == -1) {
-    printf("Name col not found\n");
+    // printf("Name col not found\n");
     exit(1);
   }
 
@@ -140,7 +140,7 @@ void parse_row(char * line, TotalCounts * tweet_counts)
     // Check for quotes
     if (*col == '"') {
       if (col[len-1] != '"') {
-        printf("Bad quote\n");
+        // printf("Bad quote\n");
         exit(1);
       }
 
@@ -148,7 +148,7 @@ void parse_row(char * line, TotalCounts * tweet_counts)
       col = col + 1;
 
       removed_quotes = 1;
-      printf("col name: %s\n", col);
+      // printf("col name: %s\n", col);
     }
 
     int match_idx = find_tweeter(tweet_counts, col);
@@ -176,14 +176,14 @@ void parse_row(char * line, TotalCounts * tweet_counts)
 
       tweet_counts->count[last] = new_tweeter_count;
 
-      printf("tweeter %s has %i tweets\n", tweet_counts->count[last]->name, tweet_counts->count[last]->n);
+      // printf("tweeter %s has %i tweets\n", tweet_counts->count[last]->name, tweet_counts->count[last]->n);
       tweet_counts->size = tweet_counts->size + 1;
     } else {
       int count = tweet_counts->count[match_idx]->n;
 
       tweet_counts->count[match_idx]->n = count + 1;
 
-      printf("tweeter %s has %i tweets\n", tweet_counts->count[match_idx]->name, tweet_counts->count[match_idx]->n);
+      // printf("tweeter %s has %i tweets\n", tweet_counts->count[match_idx]->name, tweet_counts->count[match_idx]->n);
       }
 
     // Bring back the quotes
@@ -203,20 +203,20 @@ int main(int argc, const char* argv[]) {
 
   // Open file
   if(argc < 2){
-    printf("No pathname specified\n"); 
+    // printf("No pathname specified\n"); 
     return 1; 
   }
 
   filename = argv[1];
 
-  printf("filename: %s\n\n", filename);
+  // printf("filename: %s\n\n", filename);
 
   char * buffer = 0;
   long length;
   FILE * file = fopen(filename, "rb");
 
   if (file == NULL) {
-    printf("File failed to open\n");
+    // printf("File failed to open\n");
     return 1;
   }
 
@@ -228,7 +228,7 @@ int main(int argc, const char* argv[]) {
 
   if (buffer == NULL)
   {
-    printf("Couldn't allocate buffer\n");
+    // printf("Couldn't allocate buffer\n");
     return 1;
   }
 
@@ -238,7 +238,7 @@ int main(int argc, const char* argv[]) {
 
   fread(buffer, 1, length, file);
   fclose (file);
-  // printf("contents: %s\n\n", buffer);
+  // // printf("contents: %s\n\n", buffer);
 
   /*
    * Parse Contents
@@ -246,7 +246,7 @@ int main(int argc, const char* argv[]) {
 
   // Header
 
-  printf("\n---- HEADER ----\n");
+  // printf("\n---- HEADER ----\n");
 
   char * header_line;
   header_line = strsep(&buffer, "\n");
@@ -257,10 +257,10 @@ int main(int argc, const char* argv[]) {
 
   Header* header = parse_header(header_line);
 
-  printf("header name idx: %i\n", header->tweeter_idx);
+  // printf("header name idx: %i\n", header->tweeter_idx);
   
 
-  printf("\n---- ENTRIES ----\n");
+  // printf("\n---- ENTRIES ----\n");
 
   /*
    * Counting
@@ -277,9 +277,10 @@ int main(int argc, const char* argv[]) {
     parse_row(entry_row, counts);
   }
 
-  print_tweet_counts(counts);
   sort_tweet_counts(counts);
   print_tweet_counts(counts);
+
+
 
   return 0;
 }
