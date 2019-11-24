@@ -75,7 +75,7 @@ Header * parse_header(char ** line)
   return header;
 }
 
-void parse_row(char * line, TotalCounts * tweet_count)
+void parse_row(char * line, TotalCounts * tweet_counts)
 {
   char * col = NULL;
 
@@ -103,10 +103,34 @@ void parse_row(char * line, TotalCounts * tweet_count)
       printf("col name: %s\n", col);
     }
 
-    // int i = find_tweeter(tweet_count, col);
-    // if (i == -1) {
-    //   // tweeter not yet found
-    // }
+    int match_idx = find_tweeter(tweet_counts, col);
+
+    if (match_idx == -1) {
+      // Not Found
+      int last = tweet_counts->size;
+      TweeterCount * new_count = malloc(sizeof(TweeterCount));
+      if (new_count == NULL) {
+        //todo error
+        exit(1);
+      }
+
+      int name_len = strlen(col);
+      char * tweeter_name = malloc(name_len);
+      if (tweeter_name == NULL) {
+        // todo error
+        exit(1);
+      }
+
+      memcpy(tweeter_name, col, name_len);
+
+      new_count->name = tweeter_name;
+      new_count->n = 1;
+
+      tweet_counts[last] = new_count;
+    } else {
+      int count = (tweet_counts[match_idx])->n;
+
+    }
 
     // Bring back the quotes
     if (removed_quotes) {
