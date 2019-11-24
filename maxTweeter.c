@@ -15,6 +15,10 @@ typedef struct {
   int n;
 } TweeterCount;
 
+typedef struct {
+  TweeterCount count[20000];
+  int size;
+} TotalCounts;
 
 Header * parse_header(char ** line)
 {
@@ -71,7 +75,7 @@ Header * parse_header(char ** line)
   return header;
 }
 
-void parse_row(char * line, TweeterCount * tweet_count)
+void parse_row(char * line, TotalCounts * tweet_count)
 {
   char * col = NULL;
 
@@ -99,7 +103,10 @@ void parse_row(char * line, TweeterCount * tweet_count)
       printf("col name: %s\n", col);
     }
 
-    find_tweeter(tweet_count, col);
+    // int i = find_tweeter(tweet_count, col);
+    // if (i == -1) {
+    //   // tweeter not yet found
+    // }
 
     // Bring back the quotes
     if (removed_quotes) {
@@ -177,15 +184,19 @@ int main(int argc, const char* argv[]) {
 
   printf("\n---- ENTRIES ----\n");
 
-  TweeterCount count[20000];
-
   /*
    * Counting
    */
 
+  TotalCounts * counts = malloc(sizeof(TotalCounts));
+  if (counts == NULL) {
+    //todo
+    return 1;
+  }
+
   char * entry_row;
   while ( (entry_row = strsep(&buffer, "\n")) != NULL ) {
-    parse_row(entry_row, count);
+    parse_row(entry_row, counts);
   }
 
   return 0;
