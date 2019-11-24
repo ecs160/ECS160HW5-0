@@ -16,20 +16,30 @@ typedef struct {
 } TweeterCount;
 
 typedef struct {
-  TweeterCount count[20000];
+  TweeterCount * count[20000];
   int size;
 } TotalCounts;
+
+void print_tweet_counts(TotalCounts * counts)
+{
+  printf("\n---- PRINTING ALL ----\n");
+  int i;
+  for (i=0; i<counts->size; i++) {
+    TweeterCount * this_count = counts->count[i];
+    printf("tweeter %s has %i tweets\n", this_count->name, this_count->n);
+  }
+}
 
 void sort_tweet_counts(TotalCounts * counts)
 {
   int i;
   for (i=0; i<counts->size; i++) {
     int j;
-    for (j=0; j<counts->size-i-1; j++) {
-        int a = counts->count[i].n;
-        int b = counts->count[j].n;
-        if (a <= b) {
-            TweeterCount hold = counts->count[i];
+    for (j=0; j<counts->size-i; j++) {
+        int a = counts->count[i]->n;
+        int b = counts->count[j]->n;
+        if (a >= b) {
+            TweeterCount * hold = counts->count[i];
             counts->count[i] = counts->count[j];
             counts->count[j] = hold; 
         }
@@ -49,7 +59,7 @@ int find_tweeter(TotalCounts* tweetCounts, char* name)
   int idx = -1; 
 
   for(i = 0; i < tweetCounts->size; i++){
-    if(strcmp(name, tweetCounts->count[i].name) == 0){
+    if(strcmp(name, tweetCounts->count[i]->name) == 0){
         idx = i;
         break; 
     }
@@ -164,16 +174,16 @@ void parse_row(char * line, TotalCounts * tweet_counts)
       new_tweeter_count->name = tweeter_name;
       new_tweeter_count->n = 1;
 
-      tweet_counts->count[last] = *new_tweeter_count;
+      tweet_counts->count[last] = new_tweeter_count;
 
-      printf("tweeter %s has %i tweets\n", tweet_counts->count[last].name, tweet_counts->count[last].n);
+      printf("tweeter %s has %i tweets\n", tweet_counts->count[last]->name, tweet_counts->count[last]->n);
       tweet_counts->size = tweet_counts->size + 1;
     } else {
-      int count = tweet_counts->count[match_idx].n;
+      int count = tweet_counts->count[match_idx]->n;
 
-      tweet_counts->count[match_idx].n = count + 1;
+      tweet_counts->count[match_idx]->n = count + 1;
 
-      printf("tweeter %s has %i tweets\n", tweet_counts->count[match_idx].name, tweet_counts->count[match_idx].n);
+      printf("tweeter %s has %i tweets\n", tweet_counts->count[match_idx]->name, tweet_counts->count[match_idx]->n);
       }
 
     // Bring back the quotes
@@ -266,6 +276,10 @@ int main(int argc, const char* argv[]) {
   while ( (entry_row = strsep(&buffer, "\n")) != NULL ) {
     parse_row(entry_row, counts);
   }
+
+  print_tweet_counts(counts);
+  sort_tweet_counts(counts);
+  print_tweet_counts(counts);
 
   return 0;
 }
