@@ -85,8 +85,6 @@ Header * parse_header(char ** line)
 
     int removed_quotes = 0;
 
-    char* UCol; 
-
     int len = strlen(col);
     if (*col == '"') {
       if (col[len-1] != '"') {
@@ -94,26 +92,24 @@ Header * parse_header(char ** line)
         exit(1);
       }
 
-      UCol = (char*)malloc(sizeof(char)*(len - 2)); 
-      strncpy(UCol, col, len-2); 
+      col[len-1] = '\0';
+      col = col + 1;
+
       removed_quotes = 1;
       // printf("col name: %s\n", col);
-    } else {
-      UCol = (char*)malloc(sizeof(char)*(len)); 
-      strncpy(UCol, col, len); 
     }
     
-    int cmp = strcmp(UCol, TWEETER_COL_NAME);
+    int cmp = strcmp(col, TWEETER_COL_NAME);
     if (cmp == 0) {
       // printf("found name @ %i\n", i);
       header->tweeter_idx = i;
       break;
     }
 
-    // if (removed_quotes) {
-    //   col = col - 1;
-    //   col[len-1] = '"';
-    // }
+    if (removed_quotes) {
+      col = col - 1;
+      col[len-1] = '"';
+    }
 
     i++;
   }
@@ -141,7 +137,6 @@ void parse_row(char * line, TotalCounts * tweet_counts)
     // printf("col: %s\n", col);
 
     int len = strlen(col);
-    char* UCol; 
 
     int removed_quotes = 0;
     // Check for quotes
@@ -151,16 +146,14 @@ void parse_row(char * line, TotalCounts * tweet_counts)
         exit(1);
       }
 
-      UCol = (char*)malloc(sizeof(char)*(len - 2)); 
-      strncpy(UCol, col, len-2); 
+      col[len-1] = '\0';
+      col = col + 1;
+
       removed_quotes = 1;
       // printf("col name: %s\n", col);
-    } else {
-      UCol = (char*)malloc(sizeof(char)*(len)); 
-      strncpy(UCol, col, len); 
     }
 
-    int match_idx = find_tweeter(tweet_counts, UCol);
+    int match_idx = find_tweeter(tweet_counts, col);
 
     if (match_idx == -1) {
       // Not Found
@@ -171,14 +164,14 @@ void parse_row(char * line, TotalCounts * tweet_counts)
         exit(1);
       }
 
-      int name_len = strlen(UCol);
+      int name_len = strlen(col);
       char * tweeter_name = malloc(name_len + 1);
       if (tweeter_name == NULL) {
         // todo error
         exit(1);
       }
 
-      memcpy(tweeter_name, UCol, name_len+1);
+      memcpy(tweeter_name, col, name_len+1);
 
       new_tweeter_count->name = tweeter_name;
       new_tweeter_count->n = 1;
@@ -196,10 +189,10 @@ void parse_row(char * line, TotalCounts * tweet_counts)
       }
 
     // Bring back the quotes
-    // if (removed_quotes) {
-    //   col = col - 1;
-    //   col[len-1] = '"';
-    // }
+    if (removed_quotes) {
+      col = col - 1;
+      col[len-1] = '"';
+    }
 
     i++;
   }
