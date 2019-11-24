@@ -2,13 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 
+const char * TWEETER_COL_NAME = "name";
+
 typedef struct {
   char ** col_names;
   int col_num;
   int tweeter_idx;
 } Header;
 
-char * TWEETER_COL_NAME = "name";
+typedef struct {
+  char * name;
+  int n;
+} TweeterCount;
+
 
 Header * parse_header(char ** line)
 {
@@ -25,6 +31,8 @@ Header * parse_header(char ** line)
   while( (col = strsep(&line, ",")) != NULL ) {
     printf("col entry: %s\n", col);
 
+    int removed_quotes = 0;
+
     int len = strlen(col);
     if (*col == '"') {
       if (col[len-1] != '"') {
@@ -34,6 +42,8 @@ Header * parse_header(char ** line)
 
       col[len-1] = '\0';
       col = col + 1;
+
+      removed_quotes = 1;
       printf("col name: %s\n", col);
     }
     
@@ -44,8 +54,10 @@ Header * parse_header(char ** line)
       break;
     }
 
-    col = col - 1;
-    col[len-1] = '"';
+    if (removed_quotes) {
+      col = col - 1;
+      col[len-1] = '"';
+    }
 
     i++;
   }
@@ -59,9 +71,45 @@ Header * parse_header(char ** line)
   return header;
 }
 
-void parse_row(char * line)
+void parse_row(char * line, TweeterCount * tweet_count)
 {
-  printf("entry: %s\n", line);
+  char * col = NULL;
+
+  int i = 0;
+  while( (col = strsep(&line, ",")) != NULL ) {
+
+    if (i++ != 8) {
+      continue;
+    }
+
+    int len = strlen(col);
+
+    int removed_quotes = 0;
+    // Check for quotes
+    if (*col == '"') {
+      if (col[len-1] != '"') {
+        printf("Bad quote\n");
+        exit(1);
+      }
+
+      col[len-1] = '\0';
+      col = col + 1;
+
+      removed_quotes = 1;
+      printf("col name: %s\n", col);
+    }
+
+    find_tweeter(tweet_count, col);
+
+    // Bring back the quotes
+    if (removed_quotes) {
+      col = col - 1;
+      col[len-1] = '"';
+    }
+
+    i++;
+  }
+
   return;
 }
 
@@ -126,12 +174,18 @@ int main(int argc, const char* argv[]) {
 
   printf("header name idx: %i\n", header->tweeter_idx);
   
+
   printf("\n---- ENTRIES ----\n");
-  // New line
+
+  TweeterCount count[20000];
+
+  /*
+   * Counting
+   */
+
   char * entry_row;
   while ( (entry_row = strsep(&buffer, "\n")) != NULL ) {
-    // printf("entry: %s\n", entry_line);
-    parse_row(entry_row);
+    parse_row(entry_row, count);
   }
 
   return 0;
