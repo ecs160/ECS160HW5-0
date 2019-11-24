@@ -20,6 +20,27 @@ typedef struct {
   int size;
 } TotalCounts;
 
+
+int find_tweeter(TotalCounts* tweetCounts, char* name){
+
+  if(tweetCounts == NULL || name == NULL){
+    printf("find_tweeter @ Null Argument\n");
+    return -1;
+  }
+
+  int i = 0; 
+  int idx = -1; 
+
+  for(i = 0; i < tweetCounts->size; i++){
+    if(strcmp(name, tweetCounts->count[i].name) == 0){
+        idx = i;
+        break; 
+    }
+  }
+
+  return idx;
+}
+
 Header * parse_header(char ** line)
 {
   Header * header = malloc(sizeof(Header));
