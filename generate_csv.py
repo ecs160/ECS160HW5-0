@@ -3,8 +3,8 @@ import csv
 
 names = []
 
-fatentry = "A" * 1000
-rows = 1
+fatentry = "A" * 100
+rows = 500
 cols = 15
 name_idx = 8
 
@@ -18,7 +18,7 @@ for n in range(rows):
 output = ",tweet_id,airline_sentiment,airline_sentiment_confidence,negativereason,negativereason_confidence,airline,airline_sentiment_gold,name,negativereason_gold,retweet_count,text,tweet_coord,tweet_created,tweet_location,user_timezone"
 for n in range(rows):
   row = ""
-  for c in range(cols):
+  for c in range(cols+1):
     if c == name_idx:
       rand = random.randint(0,100)
       name = names[rand % len(names)]
