@@ -184,8 +184,7 @@ void parse_row(char * line, TotalCounts * tweet_counts)
 
       tweet_counts->count[match_idx]->n = count + 1;
 
-      // printf("tweeter %s has %i tweets\n", tweet_counts->count[match_idx]->name, tweet_counts->count[match_idx]->n);
-      }
+    }
 
     // Bring back the quotes
     if (removed_quotes) {
@@ -210,7 +209,9 @@ int main(int argc, const char* argv[]) {
 
   filename = argv[1];
 
-  // printf("filename: %s\n\n", filename);
+  /*
+   * Reading file into buffer
+   */
 
   char * buffer = 0;
   long length;
@@ -239,15 +240,10 @@ int main(int argc, const char* argv[]) {
 
   fread(buffer, 1, length, file);
   fclose (file);
-  // // printf("contents: %s\n\n", buffer);
 
   /*
-   * Parse Contents
+   * Reading column headers
    */
-
-  // Header
-
-  // printf("\n---- HEADER ----\n");
 
   char * header_line;
   header_line = strsep(&buffer, "\n");
@@ -257,11 +253,6 @@ int main(int argc, const char* argv[]) {
   }
 
   Header* header = parse_header(header_line);
-
-  // printf("header name idx: %i\n", header->tweeter_idx);
-  
-
-  // printf("\n---- ENTRIES ----\n");
 
   /*
    * Counting
