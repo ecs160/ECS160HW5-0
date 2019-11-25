@@ -13,24 +13,24 @@ typedef struct {
 typedef struct {
   char * name;
   int n;
-} TweeterCount;
+} SingleTweeter;
 
 typedef struct {
-  TweeterCount * count[20000];
+  SingleTweeter * count[20000];
   int size;
-} TotalCounts;
+} AllTweeters;
 
-void print_tweet_counts(TotalCounts * counts)
+void print_tweet_counts(AllTweeters * counts)
 {
   // printf("\n---- PRINTING ALL ----\n");
   int i;
   for (i=0; i<counts->size && i < 10; i++) {
-    TweeterCount * this_count = counts->count[i];
+    SingleTweeter * this_count = counts->count[i];
     printf("%s: %i\n", this_count->name, this_count->n);
   }
 }
 
-void sort_tweet_counts(TotalCounts * counts)
+void sort_tweet_counts(AllTweeters * counts)
 {
   int i;
   for (i=0; i<counts->size; i++) {
@@ -39,7 +39,7 @@ void sort_tweet_counts(TotalCounts * counts)
         int a = counts->count[i]->n;
         int b = counts->count[j]->n;
         if (a >= b) {
-            TweeterCount * hold = counts->count[i];
+            SingleTweeter * hold = counts->count[i];
             counts->count[i] = counts->count[j];
             counts->count[j] = hold; 
         }
@@ -48,7 +48,7 @@ void sort_tweet_counts(TotalCounts * counts)
 }
 
 
-int find_tweeter(TotalCounts* tweetCounts, char* name)
+int find_tweeter(AllTweeters* tweetCounts, char* name)
 {
   if(tweetCounts == NULL || name == NULL){
     printf("find_tweeter @ Null Argument\n");
@@ -122,7 +122,7 @@ Header * parse_header(char ** line)
   return header;
 }
 
-void parse_row(char * line, TotalCounts * tweet_counts)
+void parse_row(char * line, AllTweeters * tweet_counts)
 {
   char * col = NULL;
 
@@ -157,7 +157,7 @@ void parse_row(char * line, TotalCounts * tweet_counts)
     if (match_idx == -1) {
       // Not Found
       int last = tweet_counts->size;
-      TweeterCount * new_tweeter_count = malloc(sizeof(TweeterCount));
+      SingleTweeter * new_tweeter_count = malloc(sizeof(SingleTweeter));
       if (new_tweeter_count == NULL) {
         printf("Malloc fail\n"); 
         exit(1);
@@ -258,7 +258,7 @@ int main(int argc, const char* argv[]) {
    * Counting
    */
 
-  TotalCounts * counts = malloc(sizeof(TotalCounts));
+  AllTweeters * counts = malloc(sizeof(AllTweeters));
   if (counts == NULL) {
     printf("Malloc fail\n"); 
     return 1;
