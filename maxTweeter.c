@@ -201,7 +201,10 @@ void parse_row(char * line, AllTweeters * tweet_counts, int name_idx)
 int main(int argc, const char* argv[]) {
   FILE *filename; 
 
-  // Open file
+  /*
+   * Get filename
+   */
+
   if(argc < 2){
     printf("No pathname specified\n"); 
     return 1; 
@@ -209,8 +212,11 @@ int main(int argc, const char* argv[]) {
 
   filename = argv[1];
 
-  char * buffer = 0;
-  long length;
+
+  /*
+   * Prepare file, line buffer, and line count
+   */
+
   FILE * file = fopen(filename, "rb");
 
   if (file == NULL) {
