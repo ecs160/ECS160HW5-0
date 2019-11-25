@@ -4,7 +4,7 @@ import csv
 names = []
 
 fatentry = "A" * 30
-rows = 500
+rows = 19999
 cols = 15
 name_idx = 9
 

@@ -3,6 +3,8 @@
 #include <string.h>
 
 const char * TWEETER_COL_NAME = "name";
+const int MAX_LINE_LENGTH = 1024; 
+const int MAX_LINE_NUMBER = 20000; 
 
 typedef struct {
   char * name;
@@ -10,7 +12,7 @@ typedef struct {
 } SingleTweeter;
 
 typedef struct {
-  SingleTweeter * tweeter[20000];
+  SingleTweeter * tweeter[MAX_LINE_NUMBER];
   int size;
 } AllTweeters;
 
@@ -19,6 +21,43 @@ void throw_invalid_input()
 {
   printf("Invalid Input Format\n");
   exit(1);
+}
+
+void check_file_dimensions(FILE * file){ //Checks to see that each line < 1024 && line count <= 20,000
+
+  fseek(file, 0, SEEK_SET); 
+
+  int line_length = 0; 
+  int line_count = 0;
+  int lengths_valid = 1; 
+
+  char c; 
+
+  for( ; ; ){
+    c = fgetc(file); 
+
+    if(c == EOF){
+      break; 
+    }
+
+    if(c == '\n'){
+      line_count = line_count + 1; 
+      line_length = 0; 
+    }
+
+    line_length = line_length + 1; 
+
+    if(line_length > 1024){
+      lengths_valid = 0;
+    }
+
+  }
+
+  if(lengths_valid != 1 || line_count > 20001){ //20001 to account for header line
+    throw_invalid_input();
+  }
+
+
 }
 
 void remove_quotes(char ** str, int len) //Checks if quotes are correctly formatted. Returns w/ removed quotes
@@ -47,7 +86,7 @@ void remove_quotes(char ** str, int len) //Checks if quotes are correctly format
 
 int read_line(char * line_buffer, FILE * file, int * lines_read)
 {
-  char * read_line = fgets(line_buffer, 1024, file);
+  char * read_line = fgets(line_buffer, MAX_LINE_LENGTH, file);
   if (read_line) {
     *lines_read = *lines_read + 1;
     return 1; // Has line
@@ -247,6 +286,14 @@ int main(int argc, const char* argv[]) {
     return 1;
   }
 
+  /*
+   * Santiy Check dimensions of file
+   */ 
+
+  check_file_dimensions(file); 
+
+
+  fseek(file, 0, SEEK_SET); // Reset to start of file
   char line_buffer[1024];
   int lines_read = 0;
 
@@ -277,9 +324,11 @@ int main(int argc, const char* argv[]) {
     parse_row(line_buffer, counts, name_idx, num_cols);
   }
 
+
+  fclose(file);
+
   sort_tweet_counts(counts);
   print_tweet_counts(counts);
 
-  fclose(file);
   return 0;
 }
