@@ -51,7 +51,7 @@ void sort_tweet_counts(TotalCounts * counts)
 int find_tweeter(TotalCounts* tweetCounts, char* name)
 {
   if(tweetCounts == NULL || name == NULL){
-    // printf("find_tweeter @ Null Argument\n");
+    printf("find_tweeter @ Null Argument\n");
     return -1;
   }
 
@@ -88,7 +88,7 @@ Header * parse_header(char ** line)
     int len = strlen(col);
     if (*col == '"') {
       if (col[len-1] != '"') {
-        // // printf("Bad quote\n");
+        printf("Bad quote\n");
         exit(1);
       }
 
@@ -115,10 +115,9 @@ Header * parse_header(char ** line)
   }
 
   if (header->tweeter_idx == -1) {
-    // printf("Name col not found\n");
+    printf("Name col not found\n");
     exit(1);
   }
-
 
   return header;
 }
@@ -142,8 +141,8 @@ void parse_row(char * line, TotalCounts * tweet_counts)
     // Check for quotes
     if (*col == '"') {
       if (col[len-1] != '"') {
-        // printf("Bad quote\n");
-        exit(1);
+        printf("Bad quote\n");
+        exit(1); 
       }
 
       col[len-1] = '\0';
@@ -160,14 +159,14 @@ void parse_row(char * line, TotalCounts * tweet_counts)
       int last = tweet_counts->size;
       TweeterCount * new_tweeter_count = malloc(sizeof(TweeterCount));
       if (new_tweeter_count == NULL) {
-        //todo error
+        printf("Malloc fail\n"); 
         exit(1);
       }
 
       int name_len = strlen(col);
       char * tweeter_name = malloc(name_len + 1);
       if (tweeter_name == NULL) {
-        // todo error
+        printf("Malloc fail\n"); 
         exit(1);
       }
 
@@ -205,7 +204,7 @@ int main(int argc, const char* argv[]) {
 
   // Open file
   if(argc < 2){
-    // printf("No pathname specified\n"); 
+    printf("No pathname specified\n"); 
     return 1; 
   }
 
@@ -218,7 +217,7 @@ int main(int argc, const char* argv[]) {
   FILE * file = fopen(filename, "rb");
 
   if (file == NULL) {
-    // printf("File failed to open\n");
+     printf("File failed to open\n");
     return 1;
   }
 
@@ -230,7 +229,7 @@ int main(int argc, const char* argv[]) {
 
   if (buffer == NULL)
   {
-    // printf("Couldn't allocate buffer\n");
+    printf("Couldn't allocate buffer\n");
     return 1;
   }
 
@@ -253,7 +252,7 @@ int main(int argc, const char* argv[]) {
   char * header_line;
   header_line = strsep(&buffer, "\n");
   if (header_line == NULL) {
-    // todo
+    printf("Buffer Parse failed\n"); 
     return 1;
   }
 
@@ -270,7 +269,7 @@ int main(int argc, const char* argv[]) {
 
   TotalCounts * counts = malloc(sizeof(TotalCounts));
   if (counts == NULL) {
-    //todo
+    printf("Malloc fail\n"); 
     return 1;
   }
 
