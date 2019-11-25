@@ -118,7 +118,7 @@ void parse_header(char * line, int * ret_name_idx, int * num_cols)
     if(line[counter] == ','){
       num_commas = num_commas + 1;
     }
-  }
+  } //Checks for number of commas, i.e. columns in file
 
   while( (col_name = strsep(&line, ",")) != NULL ) { //Split string by comma
 
@@ -158,7 +158,7 @@ void parse_row(char * line, AllTweeters * tweet_counts, int name_idx, int real_n
     if(line[counter] == ','){
       num_commas = num_commas + 1; 
     }
-  } //Checks for erroneous comma
+  } //Checks for extra commas: invalid input
 
   if(num_commas != real_num_cols){
     throw_invalid_input();
