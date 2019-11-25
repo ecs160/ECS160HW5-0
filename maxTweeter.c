@@ -128,8 +128,7 @@ void * parse_header(char ** line, int * ret_name_idx)
   }
 
   if (name_idx_match == -1) {
-    printf("Name col not found\n");
-    exit(1);
+    throw_invalid_input();
   }
 
   *ret_name_idx = name_idx_match;
@@ -153,6 +152,10 @@ void parse_row(char * line, AllTweeters * tweet_counts, int name_idx)
 
     remove_quotes(&tweeter, len);
 
+    if(strcmp(tweeter, "") == 0){
+      tweeter = "empty";
+    }
+    
     int match_idx = find_tweeter(tweet_counts, tweeter);
 
     if (match_idx == -1) {
