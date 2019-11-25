@@ -21,12 +21,12 @@ void throw_invalid_input()
   exit(1);
 }
 
-void remove_quotes(char ** str, int len)
+void remove_quotes(char ** str, int len) //Checks if quotes are correctly formatted. Returns w/ removed quotes
 {
   if ((*str)[0] == '"') {
     if ((*str)[len-1] != '"') {
       throw_invalid_input();
-    }
+    } //Left quote exists but right quote does not
 
     (*str)[len-1] = '\0';
     (*str) = (*str) + 1;
@@ -36,7 +36,7 @@ void remove_quotes(char ** str, int len)
   if ((*str)[len-1] == '"') {
     if ((*str)[0] != '"') {
       throw_invalid_input();
-    }
+    } //Right quote exists but left quote does not
     
     (*str)[len-1] = '\0';
     (*str) = (*str) + 1;
@@ -56,7 +56,7 @@ int read_line(char * line_buffer, FILE * file, int * lines_read)
   }
 }
 
-void print_tweet_counts(AllTweeters * all_tweeters)
+void print_tweet_counts(AllTweeters * all_tweeters) //Prints to 10 tweeters
 {
   int i;
   for (i=0; i<all_tweeters->size && i < 10; i++) {
@@ -73,7 +73,7 @@ void sort_tweet_counts(AllTweeters * all_tweeters) //Bubble sort
     for (j=0; j<all_tweeters->size-i; j++) {
         int a = all_tweeters->tweeter[i]->n;
         int b = all_tweeters->tweeter[j]->n;
-        if (a >= b) {
+        if (a > b) { //Descending order
             SingleTweeter * hold = all_tweeters->tweeter[i];
             all_tweeters->tweeter[i] = all_tweeters->tweeter[j];
             all_tweeters->tweeter[j] = hold; 
@@ -83,18 +83,18 @@ void sort_tweet_counts(AllTweeters * all_tweeters) //Bubble sort
 }
 
 
-int find_tweeter(AllTweeters* tweetCounts, char* name)
+int find_tweeter(AllTweeters* tweetCounts, char* name) //Finds index of stored name. Returns -1 if not found
 {
   if(tweetCounts == NULL || name == NULL){
     printf("find_tweeter @ Null Argument\n");
     return -1;
-  }
+  } //Bad parameter check
 
   int i = 0; 
   int idx = -1; 
 
   for(i = 0; i < tweetCounts->size; i++){
-    if(strcmp(name, tweetCounts->tweeter[i]->name) == 0){
+    if(strcmp(name, tweetCounts->tweeter[i]->name) == 0){ //Name stored. 
         idx = i;
         break; 
     }
@@ -105,27 +105,26 @@ int find_tweeter(AllTweeters* tweetCounts, char* name)
 
 void * parse_header(char ** line, int * ret_name_idx)
 {
-  int name_idx_match = -1;
+  int name_idx_match = -1; //Name column index. -1 if not found. 
 
   char * col_name = NULL;
   int name_found = 0; 
   int curr_header_idx = 0;
 
-  while( (col_name = strsep(&line, ",")) != NULL ) {
+  while( (col_name = strsep(&line, ",")) != NULL ) { //Split string by comma
 
     int len = strlen(col_name);
     
-    remove_quotes(&col_name, len);
+    remove_quotes(&col_name, len); //Check formatting
 
     
     if (strcmp(col_name, TWEETER_COL_NAME) == 0) {
-      // printf("found name @ %i\n", i);
 
       if(name_found == 0){
-        name_idx_match = curr_header_idx;
+        name_idx_match = curr_header_idx; //Found name column
         name_found = 1; 
       } else {
-        throw_invalid_input();
+        throw_invalid_input(); //If found more than once, bad formatting. 
       }
     }
 
@@ -134,7 +133,7 @@ void * parse_header(char ** line, int * ret_name_idx)
 
   if (name_idx_match == -1) {
     throw_invalid_input();
-  }
+  } //'name' not found
 
   *ret_name_idx = name_idx_match;
 }
@@ -144,7 +143,7 @@ void parse_row(char * line, AllTweeters * tweet_counts, int name_idx)
   char * col_data = NULL;
 
   int col_idx = 0;
-  while( (col_data = strsep(&line, ",")) != NULL ) {
+  while( (col_data = strsep(&line, ",")) != NULL ) { //Get data from clumns seperated by comma
 
     if (col_idx != name_idx) { // Ignore all cols except name col
       col_idx++;
@@ -155,16 +154,16 @@ void parse_row(char * line, AllTweeters * tweet_counts, int name_idx)
 
     int len = strlen(tweeter);
 
-    remove_quotes(&tweeter, len);
+    remove_quotes(&tweeter, len); //Checks formatting
 
     if(strcmp(tweeter, "") == 0){
       tweeter = "empty";
     } //Empty tweeter case
 
-    int match_idx = find_tweeter(tweet_counts, tweeter);
+    int match_idx = find_tweeter(tweet_counts, tweeter); //Checks if struct has previously recorded entry
 
     if (match_idx == -1) {
-      // Not Found
+      // Not Found, need to create new entry
       int last = tweet_counts->size;
       SingleTweeter * new_tweeter_count = malloc(sizeof(SingleTweeter));
       if (new_tweeter_count == NULL) {
@@ -189,10 +188,10 @@ void parse_row(char * line, AllTweeters * tweet_counts, int name_idx)
       tweet_counts->size = tweet_counts->size + 1;
     } else {
       int prev_count = tweet_counts->tweeter[match_idx]->n;
-      tweet_counts->tweeter[match_idx]->n = prev_count + 1;
+      tweet_counts->tweeter[match_idx]->n = prev_count + 1; //Updates tweet count for tweeter by 1
       }
 
-    col_idx++;
+    col_idx++; //Move to next column
   }
 
   return;
