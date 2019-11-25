@@ -103,13 +103,22 @@ int find_tweeter(AllTweeters* tweetCounts, char* name) //Finds index of stored n
   return idx;
 }
 
-void parse_header(char * line, int * ret_name_idx)
+void parse_header(char * line, int * ret_name_idx, int * num_cols)
 {
   int name_idx_match = -1; //Name column index. -1 if not found. 
 
   char * col_name = NULL;
   int name_found = 0; 
   int curr_header_idx = 0;
+
+  int counter = 0; 
+  int num_commas = 0;
+
+  for(counter = 0; counter < strlen(line); counter++){
+    if(line[counter] == ','){
+      num_commas = num_commas + 1;
+    }
+  }
 
   while( (col_name = strsep(&line, ",")) != NULL ) { //Split string by comma
 
@@ -136,14 +145,27 @@ void parse_header(char * line, int * ret_name_idx)
   } //'name' not found
 
   *ret_name_idx = name_idx_match;
-
+  *num_cols = num_commas;
   return ;
 }
 
-void parse_row(char * line, AllTweeters * tweet_counts, int name_idx)
+void parse_row(char * line, AllTweeters * tweet_counts, int name_idx, int real_num_cols)
 {
-  char * col_data = NULL;
+  int num_commas = 0; 
+  int counter = 0; 
 
+  for(counter = 0; counter < strlen(line); counter++){
+    if(line[counter] == ','){
+      num_commas = num_commas + 1; 
+    }
+  } //Checks for erroneous comma
+
+  if(num_commas != real_num_cols){
+    throw_invalid_input();
+  }
+
+  char * col_data = NULL;
+  int col_count = 0; 
   int col_idx = 0;
   while( (col_data = strsep(&line, ",")) != NULL ) { //Get data from clumns seperated by comma
 
@@ -238,7 +260,8 @@ int main(int argc, const char* argv[]) {
   }
 
   int name_idx = -1;
-  parse_header(line_buffer, &name_idx);
+  int num_cols = 0; 
+  parse_header(line_buffer, &name_idx, &num_cols);
 
   /*
    * Counting
@@ -251,7 +274,7 @@ int main(int argc, const char* argv[]) {
   }
 
   while ((has_line = read_line(line_buffer, file, &lines_read))) {
-    parse_row(line_buffer, counts, name_idx);
+    parse_row(line_buffer, counts, name_idx, num_cols);
   }
 
   sort_tweet_counts(counts);
