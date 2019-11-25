@@ -16,17 +16,17 @@ typedef struct {
 } SingleTweeter;
 
 typedef struct {
-  SingleTweeter * count[20000];
+  SingleTweeter * tweeter[20000];
   int size;
 } AllTweeters;
 
-void print_tweet_counts(AllTweeters * counts)
+void print_tweet_counts(AllTweeters * all_tweeters)
 {
   // printf("\n---- PRINTING ALL ----\n");
   int i;
-  for (i=0; i<counts->size && i < 10; i++) {
-    SingleTweeter * this_count = counts->count[i];
-    printf("%s: %i\n", this_count->name, this_count->n);
+  for (i=0; i<all_tweeters->size && i < 10; i++) {
+    SingleTweeter * single_tweeter = all_tweeters->tweeter[i];
+    printf("%s: %i\n", single_tweeter->name, single_tweeter->n);
   }
 }
 
@@ -36,12 +36,12 @@ void sort_tweet_counts(AllTweeters * counts)
   for (i=0; i<counts->size; i++) {
     int j;
     for (j=0; j<counts->size-i; j++) {
-        int a = counts->count[i]->n;
-        int b = counts->count[j]->n;
+        int a = counts->tweeter[i]->n;
+        int b = counts->tweeter[j]->n;
         if (a >= b) {
-            SingleTweeter * hold = counts->count[i];
-            counts->count[i] = counts->count[j];
-            counts->count[j] = hold; 
+            SingleTweeter * hold = counts->tweeter[i];
+            counts->tweeter[i] = counts->tweeter[j];
+            counts->tweeter[j] = hold; 
         }
     }
   }
@@ -59,7 +59,7 @@ int find_tweeter(AllTweeters* tweetCounts, char* name)
   int idx = -1; 
 
   for(i = 0; i < tweetCounts->size; i++){
-    if(strcmp(name, tweetCounts->count[i]->name) == 0){
+    if(strcmp(name, tweetCounts->tweeter[i]->name) == 0){
         idx = i;
         break; 
     }
@@ -175,14 +175,14 @@ void parse_row(char * line, AllTweeters * tweet_counts)
       new_tweeter_count->name = tweeter_name;
       new_tweeter_count->n = 1;
 
-      tweet_counts->count[last] = new_tweeter_count;
+      tweet_counts->tweeter[last] = new_tweeter_count;
 
       // printf("tweeter %s has %i tweets\n", tweet_counts->count[last]->name, tweet_counts->count[last]->n);
       tweet_counts->size = tweet_counts->size + 1;
     } else {
-      int count = tweet_counts->count[match_idx]->n;
+      int count = tweet_counts->tweeter[match_idx]->n;
 
-      tweet_counts->count[match_idx]->n = count + 1;
+      tweet_counts->tweeter[match_idx]->n = count + 1;
 
     }
 
