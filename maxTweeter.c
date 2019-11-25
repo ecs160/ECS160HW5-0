@@ -30,18 +30,18 @@ void print_tweet_counts(AllTweeters * all_tweeters)
   }
 }
 
-void sort_tweet_counts(AllTweeters * counts)
+void sort_tweet_counts(AllTweeters * all_tweeters) //Bubble sort
 {
   int i;
-  for (i=0; i<counts->size; i++) {
+  for (i=0; i<all_tweeters->size; i++) {
     int j;
-    for (j=0; j<counts->size-i; j++) {
-        int a = counts->tweeter[i]->n;
-        int b = counts->tweeter[j]->n;
+    for (j=0; j<all_tweeters->size-i; j++) {
+        int a = all_tweeters->tweeter[i]->n;
+        int b = all_tweeters->tweeter[j]->n;
         if (a >= b) {
-            SingleTweeter * hold = counts->tweeter[i];
-            counts->tweeter[i] = counts->tweeter[j];
-            counts->tweeter[j] = hold; 
+            SingleTweeter * hold = all_tweeters->tweeter[i];
+            all_tweeters->tweeter[i] = all_tweeters->tweeter[j];
+            all_tweeters->tweeter[j] = hold; 
         }
     }
   }
