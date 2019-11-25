@@ -103,7 +103,7 @@ int find_tweeter(AllTweeters* tweetCounts, char* name) //Finds index of stored n
   return idx;
 }
 
-void * parse_header(char ** line, int * ret_name_idx)
+void parse_header(char * line, int * ret_name_idx)
 {
   int name_idx_match = -1; //Name column index. -1 if not found. 
 
@@ -136,6 +136,8 @@ void * parse_header(char ** line, int * ret_name_idx)
   } //'name' not found
 
   *ret_name_idx = name_idx_match;
+
+  return ;
 }
 
 void parse_row(char * line, AllTweeters * tweet_counts, int name_idx)
@@ -198,7 +200,7 @@ void parse_row(char * line, AllTweeters * tweet_counts, int name_idx)
 }
 
 int main(int argc, const char* argv[]) {
-  FILE *filename; 
+  const char * filename; 
 
   /*
    * Get filename
@@ -248,7 +250,7 @@ int main(int argc, const char* argv[]) {
     return 1;
   }
 
-  while (has_line = read_line(line_buffer, file, &lines_read)) {
+  while ((has_line = read_line(line_buffer, file, &lines_read))) {
     parse_row(line_buffer, counts, name_idx);
   }
 
