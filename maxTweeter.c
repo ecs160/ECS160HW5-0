@@ -25,7 +25,7 @@ void print_tweet_counts(AllTweeters * counts)
   // printf("\n---- PRINTING ALL ----\n");
   int i;
   for (i=0; i<counts->size && i < 10; i++) {
-    SingleTweeter * this_count = counts->count[i];
+    SingleTweeter * this_count = counts->tweeter[i];
     printf("%s: %i\n", this_count->name, this_count->n);
   }
 }
