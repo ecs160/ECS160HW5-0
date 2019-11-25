@@ -29,8 +29,26 @@ void throw_invalid_input()
 
 void remove_quotes(char ** str, int len)
 {
-  (*str)[len-1] = '\0';
-  (*str) = (*str) + 1;
+  if (str[len-1] == '"') {
+    if (str[0] != '"') {
+      throw_invalid_input();
+    }
+    
+    (*str)[len-1] = '\0';
+    (*str) = (*str) + 1;
+
+    return;
+  }
+
+  if (str[0] == '"') {
+    if (str[len-1] != '"') {
+      throw_invalid_input();
+    }
+
+    (*str)[len-1] = '\0';
+    (*str) = (*str) + 1;
+  }
+
 }
 
 void print_tweet_counts(AllTweeters * all_tweeters)
@@ -112,35 +130,28 @@ void * parse_header(char ** line, int * ret_name_idx)
     exit(1);
   }
 
-  ret_name_idx = name_idx_match;
+  *ret_name_idx = name_idx_match;
 }
 
-void parse_row(char * line, AllTweeters * tweet_counts)
+void parse_row(char * line, AllTweeters * tweet_counts, int name_idx)
 {
-  char * col = NULL;
+  char * col_data = NULL;
 
-  int i = 0;
-  while( (col = strsep(&line, ",")) != NULL ) {
+  int col_idx = 0;
+  while( (col_data = strsep(&line, ",")) != NULL ) {
 
-    if (i++ != 8) {
+    if (col_idx != name_idx) { // Ignore all cols except name col
+      col_idx++;
       continue;
     }
 
-    // printf("col: %s\n", col);
+    char * tweeter = col_data;
 
-    int len = strlen(col);
+    int len = strlen(tweeter);
 
-    int removed_quotes = 0;
-    // Check for quotes
-    if (col[0] == '"') {
-      if (col[len-1] != '"') {
-        throw_invalid_input();
-      }
+    remove_quotes(&tweeter, len);
 
-      remove_quotes(&col, len);
-    }
-
-    int match_idx = find_tweeter(tweet_counts, col);
+    int match_idx = find_tweeter(tweet_counts, tweeter);
 
     if (match_idx == -1) {
       // Not Found
@@ -151,14 +162,14 @@ void parse_row(char * line, AllTweeters * tweet_counts)
         exit(1);
       }
 
-      int name_len = strlen(col);
+      int name_len = strlen(tweeter);
       char * tweeter_name = malloc(name_len + 1);
       if (tweeter_name == NULL) {
         printf("Malloc fail\n"); 
         exit(1);
       }
 
-      memcpy(tweeter_name, col, name_len+1);
+      memcpy(tweeter_name, tweeter, name_len+1);
 
       new_tweeter_count->name = tweeter_name;
       new_tweeter_count->n = 1;
@@ -171,7 +182,7 @@ void parse_row(char * line, AllTweeters * tweet_counts)
       tweet_counts->tweeter[match_idx]->n = prev_count + 1;
       }
 
-    i++;
+    col_idx++;
   }
 
   return;
@@ -217,15 +228,11 @@ int main(int argc, const char* argv[]) {
 
   fread(buffer, 1, length, file);
   fclose (file);
-  // // printf("contents: %s\n\n", buffer);
 
   /*
-   * Parse Contents
+   * Parse Header
    */
 
-  // Header
-
-  // printf("\n---- HEADER ----\n");
 
   char * header_line;
   header_line = strsep(&buffer, "\n");
@@ -236,11 +243,6 @@ int main(int argc, const char* argv[]) {
 
   int name_idx = -1;
   parse_header(header_line, &name_idx);
-
-  // printf("header name idx: %i\n", header->tweeter_idx);
-  
-
-  // printf("\n---- ENTRIES ----\n");
 
   /*
    * Counting
@@ -254,7 +256,7 @@ int main(int argc, const char* argv[]) {
 
   char * entry_row;
   while ( (entry_row = strsep(&buffer, "\n")) != NULL ) {
-    parse_row(entry_row, counts);
+    parse_row(entry_row, counts, name_idx);
   }
 
   sort_tweet_counts(counts);
