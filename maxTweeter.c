@@ -29,8 +29,18 @@ void throw_invalid_input()
 
 void remove_quotes(char ** str, int len)
 {
-  if (str[len-1] == '"') {
-    if (str[0] != '"') {
+  if ((*str)[0] == '"') {
+    if ((*str)[len-1] != '"') {
+      throw_invalid_input();
+    }
+
+    (*str)[len-1] = '\0';
+    (*str) = (*str) + 1;
+    return;
+  }
+
+  if ((*str)[len-1] == '"') {
+    if ((*str)[0] != '"') {
       throw_invalid_input();
     }
     
@@ -39,16 +49,6 @@ void remove_quotes(char ** str, int len)
 
     return;
   }
-
-  if (str[0] == '"') {
-    if (str[len-1] != '"') {
-      throw_invalid_input();
-    }
-
-    (*str)[len-1] = '\0';
-    (*str) = (*str) + 1;
-  }
-
 }
 
 void print_tweet_counts(AllTweeters * all_tweeters)
