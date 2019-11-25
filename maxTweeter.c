@@ -4,11 +4,11 @@
 
 const char * TWEETER_COL_NAME = "name";
 
-typedef struct {
-  char ** col_names;
-  int col_num;
-  int tweeter_idx;
-} Header;
+// typedef struct {
+//   char ** col_names;
+//   int col_num;
+//   int tweeter_idx;
+// } Header;
 
 typedef struct {
   char * name;
@@ -20,9 +20,21 @@ typedef struct {
   int size;
 } AllTweeters;
 
+
+void throw_invalid_input()
+{
+  printf("Invalid Input Format\n");
+  exit(1);
+}
+
+void remove_quotes(char ** str, int len)
+{
+  (*str)[len-1] = '\0';
+  (*str) = (*str) + 1;
+}
+
 void print_tweet_counts(AllTweeters * all_tweeters)
 {
-  // printf("\n---- PRINTING ALL ----\n");
   int i;
   for (i=0; i<all_tweeters->size && i < 10; i++) {
     SingleTweeter * single_tweeter = all_tweeters->tweeter[i];
@@ -68,58 +80,39 @@ int find_tweeter(AllTweeters* tweetCounts, char* name)
   return idx;
 }
 
-Header * parse_header(char ** line)
+void * parse_header(char ** line, int * ret_name_idx)
 {
-  Header * header = malloc(sizeof(Header));
-  if (header == NULL) {
-    return NULL;
-  }
+  int name_idx_match = -1;
 
-  header->tweeter_idx = -1;
+  char * col_name = NULL;
+  int curr_header_idx = 0;
 
-  char * col = NULL;
-  int i = 0;
+  while( (col_name = strsep(&line, ",")) != NULL ) {
 
-  while( (col = strsep(&line, ",")) != NULL ) {
-    // printf("col entry: %s\n", col);
-
-    int removed_quotes = 0;
-
-    int len = strlen(col);
-    if (*col == '"') {
-      if (col[len-1] != '"') {
-        printf("Bad quote\n");
-        exit(1);
+    int len = strlen(col_name);
+    if (col_name[0] == '"') {
+      if (col_name[len-1] != '"') {
+        throw_invalid_input();
       }
 
-      col[len-1] = '\0';
-      col = col + 1;
-
-      removed_quotes = 1;
-      // printf("col name: %s\n", col);
+      remove_quotes(&col_name, len);
     }
     
-    int cmp = strcmp(col, TWEETER_COL_NAME);
-    if (cmp == 0) {
+    if (strcmp(col_name, TWEETER_COL_NAME) == 0) {
       // printf("found name @ %i\n", i);
-      header->tweeter_idx = i;
+      name_idx_match = curr_header_idx;
       break;
     }
 
-    if (removed_quotes) {
-      col = col - 1;
-      col[len-1] = '"';
-    }
-
-    i++;
+    curr_header_idx++;
   }
 
-  if (header->tweeter_idx == -1) {
+  if (name_idx_match == -1) {
     printf("Name col not found\n");
     exit(1);
   }
 
-  return header;
+  ret_name_idx = name_idx_match;
 }
 
 void parse_row(char * line, AllTweeters * tweet_counts)
@@ -139,17 +132,12 @@ void parse_row(char * line, AllTweeters * tweet_counts)
 
     int removed_quotes = 0;
     // Check for quotes
-    if (*col == '"') {
+    if (col[0] == '"') {
       if (col[len-1] != '"') {
-        printf("Bad quote\n");
-        exit(1); 
+        throw_invalid_input();
       }
 
-      col[len-1] = '\0';
-      col = col + 1;
-
-      removed_quotes = 1;
-      // printf("col name: %s\n", col);
+      remove_quotes(&col, len);
     }
 
     int match_idx = find_tweeter(tweet_counts, col);
@@ -177,20 +165,11 @@ void parse_row(char * line, AllTweeters * tweet_counts)
 
       tweet_counts->tweeter[last] = new_tweeter_count;
 
-      // printf("tweeter %s has %i tweets\n", tweet_counts->count[last]->name, tweet_counts->count[last]->n);
       tweet_counts->size = tweet_counts->size + 1;
     } else {
-      int count = tweet_counts->tweeter[match_idx]->n;
-
-      tweet_counts->tweeter[match_idx]->n = count + 1;
-
-    }
-
-    // Bring back the quotes
-    if (removed_quotes) {
-      col = col - 1;
-      col[len-1] = '"';
-    }
+      int prev_count = tweet_counts->tweeter[match_idx]->n;
+      tweet_counts->tweeter[match_idx]->n = prev_count + 1;
+      }
 
     i++;
   }
@@ -209,16 +188,14 @@ int main(int argc, const char* argv[]) {
 
   filename = argv[1];
 
-  /*
-   * Reading file into buffer
-   */
+  // printf("filename: %s\n\n", filename);
 
   char * buffer = 0;
   long length;
   FILE * file = fopen(filename, "rb");
 
   if (file == NULL) {
-     printf("File failed to open\n");
+    printf("File failed to open\n");
     return 1;
   }
 
@@ -240,10 +217,15 @@ int main(int argc, const char* argv[]) {
 
   fread(buffer, 1, length, file);
   fclose (file);
+  // // printf("contents: %s\n\n", buffer);
 
   /*
-   * Reading column headers
+   * Parse Contents
    */
+
+  // Header
+
+  // printf("\n---- HEADER ----\n");
 
   char * header_line;
   header_line = strsep(&buffer, "\n");
@@ -252,7 +234,13 @@ int main(int argc, const char* argv[]) {
     return 1;
   }
 
-  Header* header = parse_header(header_line);
+  int name_idx = -1;
+  parse_header(header_line, &name_idx);
+
+  // printf("header name idx: %i\n", header->tweeter_idx);
+  
+
+  // printf("\n---- ENTRIES ----\n");
 
   /*
    * Counting
