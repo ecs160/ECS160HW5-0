@@ -154,8 +154,8 @@ void parse_row(char * line, AllTweeters * tweet_counts, int name_idx)
 
     if(strcmp(tweeter, "") == 0){
       tweeter = "empty";
-    }
-    
+    } //Empty tweeter case
+
     int match_idx = find_tweeter(tweet_counts, tweeter);
 
     if (match_idx == -1) {
