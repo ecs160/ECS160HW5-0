@@ -4,12 +4,6 @@
 
 const char * TWEETER_COL_NAME = "name";
 
-// typedef struct {
-//   char ** col_names;
-//   int col_num;
-//   int tweeter_idx;
-// } Header;
-
 typedef struct {
   char * name;
   int n;
@@ -48,6 +42,17 @@ void remove_quotes(char ** str, int len)
     (*str) = (*str) + 1;
 
     return;
+  }
+}
+
+int read_line(char * line_buffer, FILE * file, int * lines_read)
+{
+  char * read_line = fgets(line_buffer, 1024, file);
+  if (read_line) {
+    *lines_read = *lines_read + 1;
+    return 1; // Has line
+  } else {
+    return 0; // No more lines
   }
 }
 
@@ -117,7 +122,6 @@ void * parse_header(char ** line, int * ret_name_idx)
     }
     
     if (strcmp(col_name, TWEETER_COL_NAME) == 0) {
-      // printf("found name @ %i\n", i);
       name_idx_match = curr_header_idx;
       break;
     }
@@ -199,8 +203,6 @@ int main(int argc, const char* argv[]) {
 
   filename = argv[1];
 
-  // printf("filename: %s\n\n", filename);
-
   char * buffer = 0;
   long length;
   FILE * file = fopen(filename, "rb");
@@ -210,39 +212,20 @@ int main(int argc, const char* argv[]) {
     return 1;
   }
 
-  fseek(file, 0, SEEK_END);
-  length = ftell(file);
-
-  fseek(file, 0, SEEK_SET);
-  buffer = malloc(length);
-
-  if (buffer == NULL)
-  {
-    printf("Couldn't allocate buffer\n");
-    return 1;
-  }
-
-  /*
-   * Read file Contents
-   */
-
-  fread(buffer, 1, length, file);
-  fclose (file);
+  char line_buffer[1024];
+  int lines_read = 0;
 
   /*
    * Parse Header
    */
 
-
-  char * header_line;
-  header_line = strsep(&buffer, "\n");
-  if (header_line == NULL) {
-    printf("Buffer Parse failed\n"); 
-    return 1;
+  int has_line = read_line(line_buffer, file, &lines_read);
+  if (!has_line) {
+    throw_invalid_input();
   }
 
   int name_idx = -1;
-  parse_header(header_line, &name_idx);
+  parse_header(line_buffer, &name_idx);
 
   /*
    * Counting
@@ -254,15 +237,13 @@ int main(int argc, const char* argv[]) {
     return 1;
   }
 
-  char * entry_row;
-  while ( (entry_row = strsep(&buffer, "\n")) != NULL ) {
-    parse_row(entry_row, counts, name_idx);
+  while (has_line = read_line(line_buffer, file, &lines_read)) {
+    parse_row(line_buffer, counts, name_idx);
   }
 
   sort_tweet_counts(counts);
   print_tweet_counts(counts);
 
-
-
+  fclose(file);
   return 0;
 }
