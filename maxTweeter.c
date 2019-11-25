@@ -108,30 +108,32 @@ void * parse_header(char ** line, int * ret_name_idx)
   int name_idx_match = -1;
 
   char * col_name = NULL;
+  int name_found = 0; 
   int curr_header_idx = 0;
 
   while( (col_name = strsep(&line, ",")) != NULL ) {
 
     int len = strlen(col_name);
-    if (col_name[0] == '"') {
-      if (col_name[len-1] != '"') {
-        throw_invalid_input();
-      }
+    
+    remove_quotes(&col_name, len);
 
-      remove_quotes(&col_name, len);
-    }
     
     if (strcmp(col_name, TWEETER_COL_NAME) == 0) {
-      name_idx_match = curr_header_idx;
-      break;
+      // printf("found name @ %i\n", i);
+
+      if(name_found == 0){
+        name_idx_match = curr_header_idx;
+        name_found = 1; 
+      } else {
+        throw_invalid_input();
+      }
     }
 
     curr_header_idx++;
   }
 
   if (name_idx_match == -1) {
-    printf("Name col not found\n");
-    exit(1);
+    throw_invalid_input();
   }
 
   *ret_name_idx = name_idx_match;
@@ -154,6 +156,10 @@ void parse_row(char * line, AllTweeters * tweet_counts, int name_idx)
     int len = strlen(tweeter);
 
     remove_quotes(&tweeter, len);
+
+    if(strcmp(tweeter, "") == 0){
+      tweeter = "empty";
+    } //Empty tweeter case
 
     int match_idx = find_tweeter(tweet_counts, tweeter);
 
